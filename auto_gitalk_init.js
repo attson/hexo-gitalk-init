@@ -7,6 +7,13 @@ let config = {}
 
 if (fs.existsSync(path.join(__dirname, 'gitalk_init.json'))) {
     config = JSON.parse(fs.readFileSync(path.join(__dirname, 'gitalk_init.json')).toString('utf-8'))
+
+    Object.keys(config).forEach(key => {
+        let value = config[key];
+        if (value.startsWith("process.env.")) {
+            config[key] = process.env[value.substring(12)]
+        }
+    })
 } else {
     // 配置信息
     config = {
@@ -25,7 +32,7 @@ if (fs.existsSync(path.join(__dirname, 'gitalk_init.json'))) {
         cacheFile: process.env.GITALK_INIT_CACHE_FILE || path.join(__dirname, './public/gitalk-init-cache.json'),
 
         // 只用于获取缓存的来源，缓存仍然会写到 cacheFile. 优先级 cacheFile > cacheRemote. 故有cacheFile的时候，忽略 cacheRemote
-        cacheRemote: process.env.GITALK_INIT_CACHE_REMOTE || 'http://127.0.0.1:4000/gitalk-init-cache.json',
+        cacheRemote: process.env.GITALK_INIT_CACHE_REMOTE || `https://${this.repo}/gitalk-init-cache.json`,
         // 通过远程读取文件，这样就不需要在本地的博客源文件中保存(保存在静态站点的public中)
         // output 到 public 目的就是将文件放在静态站点里面，下一次构建时，可以从远程读取
 
@@ -402,4 +409,4 @@ const autoGitalkInit = {
     },
 }
 
-autoGitalkInit.start(config.postsDir).then(r => console.log('end'));
+autoGitalkInit.start(config.postsDir).then(() => console.log('end'));
