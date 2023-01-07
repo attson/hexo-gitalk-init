@@ -6,7 +6,7 @@ const https = require('https');
 let config = {}
 
 if (fs.existsSync(path.join(__dirname, 'gitalk_init.json'))) {
-    config = JSON.parse(fs.readFileSync(path.join(__dirname, 'gitalk_init.json')).toString("utf-8"))
+    config = JSON.parse(fs.readFileSync(path.join(__dirname, 'gitalk_init.json')).toString('utf-8'))
 } else {
     // 配置信息
     config = {
@@ -25,13 +25,15 @@ if (fs.existsSync(path.join(__dirname, 'gitalk_init.json'))) {
         cacheFile: process.env.GITALK_INIT_CACHE_FILE || path.join(__dirname, './public/gitalk-init-cache.json'),
 
         // 只用于获取缓存的来源，缓存仍然会写到 cacheFile. 优先级 cacheFile > cacheRemote. 故有cacheFile的时候，忽略 cacheRemote
-        cacheRemote: process.env.GITALK_INIT_CACHE_REMOTE || "http://127.0.0.1:4000/gitalk-init-cache.json",
+        cacheRemote: process.env.GITALK_INIT_CACHE_REMOTE || 'http://127.0.0.1:4000/gitalk-init-cache.json',
         // 通过远程读取文件，这样就不需要在本地的博客源文件中保存(保存在静态站点的public中)
         // output 到 public 目的就是将文件放在静态站点里面，下一次构建时，可以从远程读取
+
+        postsDir: process.env.GITALK_INIT_POSTS_DIR || 'source/_posts'
     };
 }
 
-const hostname = "api.github.com"
+const hostname = 'api.github.com'
 const apiPath = '/repos/' + config.username + '/' + config.repo + '/issues';
 
 const autoGitalkInit = {
@@ -44,7 +46,7 @@ const autoGitalkInit = {
             if (fs.statSync(name).isDirectory()) {
                 this.getFiles(name, files_);
             } else {
-                if (name.endsWith(".md")) {
+                if (name.endsWith('.md')) {
                     files_.push(name);
                 }
             }
@@ -67,16 +69,16 @@ const autoGitalkInit = {
 
         for await (const line of rl) {
             if (start === true) {
-                if (line.trim() === "---") {
+                if (line.trim() === '---') {
                     break
                 } else {
-                    let items = line.split(":")
-                    if (["title", "desc", "date", "comment"].indexOf(items[0].trim()) !== -1) {
+                    let items = line.split(':')
+                    if (['title', 'desc', 'date', 'comment'].indexOf(items[0].trim()) !== -1) {
                         post[items[0].trim()] = items[1].trim()
                     }
                 }
             } else {
-                if (line.trim() === "---") {
+                if (line.trim() === '---') {
                     start = true
                 }
             }
@@ -89,17 +91,17 @@ const autoGitalkInit = {
 
             return null
         }
-        if (post["comment"] === false || post["comment"] === "false") {
-            console.log(`gitalk: ignore by comment = ${post["comment"]} : ${file}`);
+        if (post['comment'] === false || post['comment'] === 'false') {
+            console.log(`gitalk: ignore by comment = ${post['comment']} : ${file}`);
             return null
         }
 
-        if (!("title" in post)) {
+        if (!('title' in post)) {
             console.log(`gitalk: ignore because the title miss: ${file}`);
             return null
         }
 
-        if (!("date" in post)) {
+        if (!('date' in post)) {
             console.log(`gitalk: ignore because the date miss: ${file}`);
             return null
         }
@@ -112,7 +114,7 @@ const autoGitalkInit = {
         }
 
         // url year/month/day/file
-        post['url'] = "/" + post['date'].substring(0, 10).replace(/[-|\s]/g, "/") + `/${path.basename(file, ".md")}/`
+        post['url'] = '/' + post['date'].substring(0, 10).replace(/[-|\s]/g, '/') + `/${path.basename(file, '.md')}/`
         post['desc'] = post['title']
 
         delete post['date']
@@ -131,7 +133,7 @@ const autoGitalkInit = {
         return posts
     },
 
-    // 初始化
+    // 调用github接口初始化
     gitalkInitInvoke: function ({url, id, title, desc}) {
         let options = {
             'method': 'POST',
@@ -158,17 +160,17 @@ const autoGitalkInit = {
             let req = https.request(options, function (res) {
                 let chunks = [];
 
-                res.on("data", function (chunk) {
+                res.on('data', function (chunk) {
                     chunks.push(chunk);
                 });
 
-                res.on("end", function () {
+                res.on('end', function () {
                     console.log(Buffer.concat(chunks).toString())
 
                     return resolve([false, true]);
                 });
 
-                res.on("error", function (error) {
+                res.on('error', function (error) {
                     return resolve([error, false]);
                 });
             });
@@ -180,12 +182,11 @@ const autoGitalkInit = {
     },
 
     /**
-     * 通过以请求判断是否已经初始化
+     * 通过github api 请求判断是否已经初始化
      * @param {string} id gitalk 初始化的id
      * @return {Promise<[boolean, boolean]>} 第一个值表示是否出错，第二个值 false 表示没初始化， true 表示已经初始化
      */
-    getIsInitByRequest: function (id) {
-
+    getIsInitByGitHub: function (id) {
         let options = {
             'method': 'GET',
             'hostname': hostname,
@@ -203,11 +204,11 @@ const autoGitalkInit = {
             let req = https.request(options, function (res) {
                 let chunks = [];
 
-                res.on("data", function (chunk) {
+                res.on('data', function (chunk) {
                     chunks.push(chunk);
                 });
 
-                res.on("end", function () {
+                res.on('end', function () {
                     const res = JSON.parse(Buffer.concat(chunks).toString());
                     if (res.length > 0) {
                         return resolve([false, true]);
@@ -216,7 +217,7 @@ const autoGitalkInit = {
                     }
                 });
 
-                res.on("error", function (error) {
+                res.on('error', function (error) {
                     return resolve([error, false]);
                 });
             });
@@ -229,33 +230,37 @@ const autoGitalkInit = {
     // 第一个值表示是否出错，第二个值 false 表示没初始化， true 表示已经初始化
     idIsInit: async function (id) {
         if (!config.cache) {
-            return this.getIsInitByRequest(id);
+            return this.getIsInitByGitHub(id);
         }
         // 如果通过缓存查询到的数据是未初始化，则再通过请求判断是否已经初始化，防止多次初始化
 
         let cacheRes = await this.getIsInitByCache(id)
         if (cacheRes === false) {
-            console.log(id + " 缓存不存在, 从github获取状态...")
+            console.log(id + ' 缓存不存在, 从github获取状态...')
 
-            return this.getIsInitByRequest(id);
+            return this.getIsInitByGitHub(id);
         }
         return [false, true];
     },
 
-    getOutputCacheFrom() {
+    /**
+     * 通过远程地址获取缓存内容
+     * @returns {Promise<Object>}
+     */
+    getRemoteCache() {
         return new Promise((resolve, reject) => {
             let req = https.get(config.cacheRemote, function (res) {
                 let chunks = [];
 
-                res.on("data", function (chunk) {
+                res.on('data', function (chunk) {
                     chunks.push(chunk);
                 });
 
-                res.on("end", function () {
+                res.on('end', function () {
                     return resolve(JSON.parse(Buffer.concat(chunks).toString()));
                 });
 
-                res.on("error", function (error) {
+                res.on('error', function (error) {
                     return reject(error);
                 });
             });
@@ -264,7 +269,7 @@ const autoGitalkInit = {
         })
     },
     /**
-     * 通过缓存判断是否已经初始化
+     * 通过缓存判断是否已经初始化, 优先加载缓存文件，文件不存在则尝试从 cacheRemote 获取
      * @param {string} gitalkId 初始化的id
      * @return {Promise<boolean>} false 表示没初始化， true 表示已经初始化
      */
@@ -273,19 +278,19 @@ const autoGitalkInit = {
             // 判断缓存文件是否存在
             this.gitalkCache = false;
             try {
-                this.gitalkCache = JSON.parse(fs.readFileSync(config.cacheFile).toString("utf-8"));
+                this.gitalkCache = JSON.parse(fs.readFileSync(config.cacheFile).toString('utf-8'));
 
-                console.log("读取缓存文件成功 " + config.cacheFile)
+                console.log('读取缓存文件成功 ' + config.cacheFile)
             } catch (e) {
-                console.log("读取缓存文件失败 " + config.cacheFile + " : " + e.message)
+                console.log('读取缓存文件失败 ' + config.cacheFile + ' : ' + e.message)
 
                 if (config.cacheRemote) {
-                    console.log("正在从 " + config.cacheRemote + " 读取文件")
+                    console.log('正在从 ' + config.cacheRemote + ' 读取文件')
                     try {
-                        this.gitalkCache = await this.getOutputCacheFrom()
-                        console.log("读取缓存文件成功 " + config.cacheRemote)
+                        this.gitalkCache = await this.getRemoteCache()
+                        console.log('读取缓存文件成功 ' + config.cacheRemote)
                     } catch (e) {
-                        console.log("读取缓存文件失败 " + config.cacheRemote + " : " + e.message)
+                        console.log('读取缓存文件失败 ' + config.cacheRemote + ' : ' + e.message)
                     }
                 }
             }
@@ -397,4 +402,4 @@ const autoGitalkInit = {
     },
 }
 
-autoGitalkInit.start('source/_posts').then(r => console.log("end"));
+autoGitalkInit.start(config.postsDir).then(r => console.log('end'));
