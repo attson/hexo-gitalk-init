@@ -27,7 +27,7 @@ if (fs.existsSync(path.join(__dirname, 'gitalk_init.json'))) {
         token: process.env.GITALK_TOKEN,
 
         // 是否启用缓存，启用缓存会将已经初始化的数据写入配置的 outputCacheFile 文件，下一次直接通过缓存文件 outputCacheFile 判断
-        cache: process.env.GITAK_INIT_CACHE || true,
+        enableCache: process.env.GITAK_INIT_CACHE || true,
         // 缓存文件输出的位置
         cacheFile: process.env.GITALK_INIT_CACHE_FILE || path.join(__dirname, './public/gitalk-init-cache.json'),
 
@@ -236,7 +236,7 @@ const autoGitalkInit = {
     // 根据缓存，判断链接是否已经初始化
     // 第一个值表示是否出错，第二个值 false 表示没初始化， true 表示已经初始化
     idIsInit: async function (id) {
-        if (!config.cache) {
+        if (!config.enableCache) {
             return this.getIsInitByGitHub(id);
         }
         // 如果通过缓存查询到的数据是未初始化，则再通过请求判断是否已经初始化，防止多次初始化
@@ -400,7 +400,7 @@ const autoGitalkInit = {
         console.log(`本次成功： ${successData.length} 条。`);
 
         // 写入缓存
-        if (config.cache) {
+        if (config.enableCache) {
             console.log(`写入缓存： ${(initializedData.length + successData.length)} 条，已初始化 ${initializedData.length} 条，本次成功： ${successData.length} 条。参考文件 ${config.cacheFile}。`);
             await this.write(config.cacheFile, JSON.stringify(initializedData.concat(successData), null, 2));
         } else {
