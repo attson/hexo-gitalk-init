@@ -1,6 +1,6 @@
 # hexo-gitalk-init
 
-Hexo gitalk 轻量级初始化工具
+Hexo gitalk 轻量级初始化脚本
 
 ## Feature
 
