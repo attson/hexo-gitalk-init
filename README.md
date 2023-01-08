@@ -76,7 +76,7 @@ json 文件支持使用process.env 占位, 在 process.env.name 前后增加 {}
 
 本地json文件
 
-### 配置完成后, 执行命令
+### 2. 配置完成后, 执行命令
 
 ```bash
 curl -s https://raw.githubusercontent.com/attson/hexo-gitalk-init/main/auto_gitalk_init.js | node
