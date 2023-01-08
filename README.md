@@ -9,6 +9,8 @@ Hexo gitalk 极简初始化脚本
 3. 更适合自动化
 4. 代码强迫症福音
 
+![img.png](doc/code_check.png)
+
 ## github workflows 极简使用
 
 ![img.png](doc/workflows.png)
