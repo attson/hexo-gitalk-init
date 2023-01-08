@@ -10,9 +10,12 @@ if (fs.existsSync(path.join(__dirname, 'gitalk_init.json'))) {
 
     Object.keys(config).forEach(key => {
         let value = config[key];
-        if (value.startsWith("process.env.")) {
-            config[key] = process.env[value.substring(12)]
-        }
+
+        const reg = /{process\.env\.[a-zA-Z_\-}]*/gm
+
+        value.match(reg).forEach(match => {
+            config[key].replace(match, process.env[match.substring(13, match.length - 1)])
+        })
     })
 } else {
     // 配置信息
