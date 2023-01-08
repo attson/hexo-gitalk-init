@@ -362,7 +362,7 @@ const autoGitalkInit = {
             if (fs.existsSync("get-gitalk-id.js")) {
                 this.gitalkIdGenerator = require(path.join(__dirname, "get-gitalk-id.js")).getGitalkId
             } else {
-                this.gitalkIdGenerator = function (pathname, title, desc, date) {
+                this.gitalkIdGenerator = function (pathname) {
                     let id = pathname
 
                     // github issue label max 50
