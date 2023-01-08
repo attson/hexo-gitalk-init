@@ -24,13 +24,13 @@ if (fs.existsSync(path.join(__dirname, 'gitalk_init.json'))) {
         username: process.env.GITHUB_REPOSITORY_OWNER,
 
         // 储存评论issue的github仓库名，仅需要仓库名字即可。对应 Gitalk配置中的repo
-        repo: process.env.GITAK_INIT_REPO,
+        repo: process.env.GITALK_INIT_REPO,
 
         // 从 GitHub 的 Personal access tokens 页面，点击 Generate new token
         token: process.env.GITALK_TOKEN,
 
         // 是否启用缓存，启用缓存会将已经初始化的数据写入配置的 outputCacheFile 文件，下一次直接通过缓存文件 outputCacheFile 判断
-        enableCache: process.env.GITAK_INIT_CACHE || true,
+        enableCache: process.env.GITALK_INIT_CACHE || true,
         // 缓存文件输出的位置
         cacheFile: process.env.GITALK_INIT_CACHE_FILE || path.join(__dirname, './public/gitalk-init-cache.json'),
 
