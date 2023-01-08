@@ -87,3 +87,46 @@ curl -s https://raw.githubusercontent.com/attson/hexo-gitalk-init/main/auto_gita
 | cacheRemote | 获取缓存的远程地址                           | process.env.GITALK_INIT_CACHE_REMOTE <br/> &#124;&#124; `https://${this.repo}/gitalk-init-cache.json`           | 只用于获取缓存的来源，缓存仍然会写到 cacheFile. 读取优先级 cacheFile > cacheRemote. 故cacheFile文件存在时，忽略 cacheRemote |
 | postsDir    | hexo posts 文件路径                     | process.env.GITALK_INIT_POSTS_DIR <br/> &#124;&#124; 'source/_posts'                                            |                                                                                             |
 
+
+
+## 其他说明
+
+- 本脚本代码由 https://blog.jijian.link/2020-01-10/hexo-gitalk-auto-init/ 改造而来。原作者脚本需增加依赖 `request xml-parser blueimp-md5 moment hexo-generator-sitemap`
+- 本脚本默认使用下面的方式一下的方式生成 gitalkId
+```js
+(pathname, title, desc, date) => {
+    let id = pathname
+
+    // github issue label max 50
+    if (id.length > 50) {
+        id = id.substring(0, 50 - 3) + '...'
+    }
+
+    return id
+}
+```
+不同的主题可能使用不同的生成方式，请检查主题的代码中gitalkId生成逻辑, 是否一致。
+
+![img.png](doc/gitalkId.png)
+
+不一致可以在执行目录增加 get-gitalk-id.js, 可以替代默认生成方式
+
+```js
+
+function getGitalkId(pathname, title, desc, date) {
+    let id = pathname
+
+    // github issue label max 50
+    if (id.length > 50) {
+        id = id.substring(0, 50 - 3) + '...'
+    }
+
+    return id
+}
+
+module.exports = {
+    getGitalkId
+}
+```
+
+

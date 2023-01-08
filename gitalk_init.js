@@ -9,7 +9,7 @@ if (fs.existsSync(path.join(__dirname, 'gitalk_init.json'))) {
     config = JSON.parse(fs.readFileSync(path.join(__dirname, 'gitalk_init.json')).toString('utf-8'))
 
     Object.keys(config).forEach(key => {
-        let value = config[key];
+        const value = config[key];
 
         const reg = /{process\.env\.[a-zA-Z_\-}]*/gm
 
@@ -60,9 +60,10 @@ const apiPath = '/repos/' + config.username + '/' + config.repo + '/issues';
 
 const autoGitalkInit = {
     gitalkCache: null,
-    getFiles: function (dir, files_) {
+    gitalkIdGenerator: null,
+    getFiles (dir, files_) {
         files_ = files_ || [];
-        let files = fs.readdirSync(dir);
+        const files = fs.readdirSync(dir);
         for (let i in files) {
             let name = dir + '/' + files[i];
             if (fs.statSync(name).isDirectory()) {
@@ -75,7 +76,7 @@ const autoGitalkInit = {
         }
         return files_;
     },
-    readItem: async function (file) {
+    async readItem(file) {
         const fileStream = fs.createReadStream(file);
 
         const rl = readline.createInterface({
@@ -94,7 +95,7 @@ const autoGitalkInit = {
                 if (line.trim() === '---') {
                     break
                 } else {
-                    let items = line.split(':')
+                    const items = line.split(':')
                     if (['title', 'desc', 'date', 'comment'].indexOf(items[0].trim()) !== -1) {
                         post[items[0].trim()] = items[1].trim()
                     }
@@ -135,18 +136,17 @@ const autoGitalkInit = {
             return false;
         }
 
-        // url year/month/day/file
-        post['url'] = '/' + post['date'].substring(0, 10).replace(/[-|\s]/g, '/') + `/${path.basename(file, '.md')}/`
+        // pathname /year/month/day/file_without_extend/
+        post['pathname'] = '/' + post['date'].substring(0, 10).replace(/[-|\s]/g, '/') + `/${path.basename(file, '.md')}/`
         post['desc'] = post['title']
 
-        delete post['date']
         return post
     },
 
-    readItems: async function (dir) {
-        let posts = [];
+    async readPosts(dir) {
+        const posts = [];
         for (let file of this.getFiles(dir)) {
-            let post = await this.readItem(file);
+            const post = await this.readItem(file);
             if (post != null) {
                 posts.push(post)
             }
@@ -156,8 +156,8 @@ const autoGitalkInit = {
     },
 
     // 调用github接口初始化
-    gitalkInitInvoke: function ({url, id, title, desc}) {
-        let options = {
+    gitalkInitInvoke({pathname, id, title, desc}) {
+        const options = {
             'method': 'POST',
             'hostname': hostname,
             'path': apiPath,
@@ -169,7 +169,7 @@ const autoGitalkInit = {
             'maxRedirects': 20
         };
 
-        let link = `https://${config.repo}${url}`
+        const link = `https://${config.repo}${pathname}`
 
         //创建issue
         const reqBody = {
@@ -180,7 +180,7 @@ const autoGitalkInit = {
 
         return new Promise(resolve => {
             let req = https.request(options, function (res) {
-                let chunks = [];
+                const chunks = [];
 
                 res.on('data', function (chunk) {
                     chunks.push(chunk);
@@ -208,8 +208,8 @@ const autoGitalkInit = {
      * @param {string} id gitalk 初始化的id
      * @return {Promise<[boolean, boolean]>} 第一个值表示是否出错，第二个值 false 表示没初始化， true 表示已经初始化
      */
-    getIsInitByGitHub: function (id) {
-        let options = {
+    getIsInitByGitHub (id) {
+        const options = {
             'method': 'GET',
             'hostname': hostname,
             'path': apiPath + '?labels=Gitalk,' + id,
@@ -223,8 +223,8 @@ const autoGitalkInit = {
         };
 
         return new Promise((resolve) => {
-            let req = https.request(options, function (res) {
-                let chunks = [];
+            const req = https.request(options, function (res) {
+                const chunks = [];
 
                 res.on('data', function (chunk) {
                     chunks.push(chunk);
@@ -250,13 +250,13 @@ const autoGitalkInit = {
 
     // 根据缓存，判断链接是否已经初始化
     // 第一个值表示是否出错，第二个值 false 表示没初始化， true 表示已经初始化
-    idIsInit: async function (id) {
+    async idIsInit (id) {
         if (!config.enableCache) {
             return this.getIsInitByGitHub(id);
         }
         // 如果通过缓存查询到的数据是未初始化，则再通过请求判断是否已经初始化，防止多次初始化
 
-        let cacheRes = await this.getIsInitByCache(id)
+        const cacheRes = await this.getIsInitByCache(id)
         if (cacheRes === false) {
             console.log(id + ' 缓存不存在, 从github获取状态...')
 
@@ -271,8 +271,8 @@ const autoGitalkInit = {
      */
     getRemoteCache() {
         return new Promise((resolve, reject) => {
-            let req = https.get(config.cacheRemote, function (res) {
-                let chunks = [];
+            const req = https.get(config.cacheRemote, function (res) {
+                const chunks = [];
 
                 res.on('data', function (chunk) {
                     chunks.push(chunk);
@@ -295,7 +295,7 @@ const autoGitalkInit = {
      * @param {string} gitalkId 初始化的id
      * @return {Promise<boolean>} false 表示没初始化， true 表示已经初始化
      */
-    getIsInitByCache: async function (gitalkId) {
+    async getIsInitByCache(gitalkId){
         if (this.gitalkCache === null) {
             // 判断缓存文件是否存在
             this.gitalkCache = false;
@@ -318,7 +318,7 @@ const autoGitalkInit = {
             }
         }
 
-        let that = this
+        const that = this
 
         return Promise.resolve(function (gitalkId) {
             if (!that.gitalkCache) {
@@ -334,7 +334,7 @@ const autoGitalkInit = {
      * @param {string} content 内容
      * @param flag
      */
-    write: async function (fileName, content, flag = 'w+') {
+    async write(fileName, content, flag = 'w+') {
         return new Promise((resolve) => {
             fs.open(fileName, flag, function (err, fd) {
                 if (err) {
@@ -356,18 +356,38 @@ const autoGitalkInit = {
             });
         });
     },
+    // 生成 GitalkId
+    getGitalkId(pathname, title, desc, date) {
+        if (this.gitalkIdGenerator == null) {
+            if (fs.existsSync("get-gitalk-id.js")) {
+                this.gitalkIdGenerator = require(path.join(__dirname, "get-gitalk-id.js")).getGitalkId
+            } else {
+                this.gitalkIdGenerator = function (pathname, title, desc, date) {
+                    let id = pathname
 
-    start: async function (postDir) {
-        const urls = await this.readItems(postDir);
+                    // github issue label max 50
+                    if (id.length > 50) {
+                        id = id.substring(0, 50 - 3) + '...'
+                    }
+
+                    return id
+                }
+            }
+        }
+
+        return this.gitalkIdGenerator(pathname, title, desc, date)
+    },
+    async start(postDir) {
+        const posts = await this.readPosts(postDir);
         // 报错的数据
         const errorData = [];
         // 已经初始化的数据
         const initializedData = [];
         // 成功初始化数据
         const successData = [];
-        for (const item of urls) {
-            const {url, title, desc} = item;
-            const id = url;
+        for (const item of posts) {
+            const {pathname, title, desc, date} = item;
+            const id = this.getGitalkId(pathname, title, desc, date);
             const [err, res] = await this.idIsInit(id);
             if (err) {
                 console.log(`Error: 查询评论异常 [ ${title} ] , 信息：`, err || '无');
@@ -385,7 +405,7 @@ const autoGitalkInit = {
             console.log(`Gitalk 初始化开始... [ ${title} ] `);
             const [e, r] = await this.gitalkInitInvoke({
                 id,
-                url,
+                pathname,
                 title,
                 desc
             });
