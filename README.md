@@ -13,7 +13,7 @@ Hexo gitalk 轻量级初始化脚本
 
 ![img.png](doc/workflows.png)
 
-在 GitHub workflows 通常只需增加一个 GITALK_INIT stage, 并且只需添加 GITALK_TOKEN (Personal access token) 环境变量
+在 GitHub workflows 通常只需增加一个 GITALK_INIT stage, 并且只需添加 GITALK_TOKEN (Personal access token) 环境变量, 就会在 <owner>.github.io 中初始化gitalk
 
 ```yaml
 - name: GITALK_INIT
