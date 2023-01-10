@@ -21,7 +21,14 @@ Hexo gitalk 极简初始化脚本
 
 ```yaml
 - name: GITALK_INIT
-  run: GITALK_TOKEN=${{ secrets.BUILD_GITHUB_IO_GITALK }}  if [ $(curl -sL https://raw.githubusercontent.com/attson/hexo-gitalk-init/v1.0.0/gitalk_init.js -o gitalk_init.js | md5sum) = "d41d8cd98f00b204e9800998ecf8427e" ]; then node gitalk_init.js; fi
+  run: GITALK_TOKEN=${{ secrets.BUILD_GITHUB_IO_GITALK }} curl -sL https://raw.githubusercontent.com/attson/hexo-gitalk-init/v1.0.0/gitalk_init.js | node
+```
+
+或者下载该脚本在项目中
+
+```yaml
+- name: GITALK_INIT
+  run: GITALK_TOKEN=${{ secrets.BUILD_GITHUB_IO_GITALK }} node gitalk_init.js
 ```
 
 ## 完整使用步骤
@@ -83,11 +90,7 @@ json 文件支持使用process.env 占位, 在 process.env.name 前后增加 {}
 ### 2. 配置完成后, 执行命令
 
 ```bash
-curl -s https://raw.githubusercontent.com/attson/hexo-gitalk-init/main/auto_gitalk_init.js | node
-```
-
-```bash
-if [ $(curl -sL https://raw.githubusercontent.com/attson/hexo-gitalk-init/v1.0.0/gitalk_init.js -o gitalk_init.js | md5sum) = "d41d8cd98f00b204e9800998ecf8427e" ]; then node gitalk_init.js; fi
+curl -sL https://raw.githubusercontent.com/attson/hexo-gitalk-init/v1.0.0/gitalk_init.js | node
 ```
 
 ![img.png](doc/img.png)
