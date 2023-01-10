@@ -17,6 +17,8 @@ Hexo gitalk 极简初始化脚本
 
 在 GitHub workflows 通常只需增加一个 GITALK_INIT stage, 并且只需添加 GITALK_TOKEN (Personal access token) 环境变量, 就会在 {owner}.github.io 中初始化gitalk
 
+[Token 生成请看](#Personal access token 怎么生成)
+
 ```yaml
 - name: GITALK_INIT
   run: GITALK_TOKEN=${{ secrets.BUILD_GITHUB_IO_GITALK }}  curl -s https://raw.githubusercontent.com/attson/hexo-gitalk-init/main/gitalk_init.js | node
@@ -85,6 +87,22 @@ curl -s https://raw.githubusercontent.com/attson/hexo-gitalk-init/main/auto_gita
 ```
 
 ![img.png](doc/img.png)
+
+## Personal access token 怎么生成
+
+### 生成token
+
+从 GitHub 的 [Personal access tokens](https://github.com/settings/tokens) 页面，点击 [Generate new token](https://github.com/settings/tokens/new)
+
+![img.png](doc/personal_token.png)
+
+### [git workflows]
+
+在的git workflows 运行的仓库增加 secrets
+
+![img.png](doc/secret.png)
+
+![img.png](doc/secret_name.png)
 
 ## 其他说明
 
