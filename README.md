@@ -17,7 +17,7 @@ Hexo gitalk 极简初始化脚本
 
 在 GitHub workflows 通常只需增加一个 GITALK_INIT stage, 并且只需添加 GITALK_TOKEN (Personal access token) 环境变量, 就会在 {owner}.github.io 中初始化gitalk
 
-[Token 生成请看](#Personal access token 怎么生成)
+[Token 生成请看](./README.md#Personal access token 怎么生成)
 
 ```yaml
 - name: GITALK_INIT
