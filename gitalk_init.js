@@ -13,9 +13,12 @@ if (fs.existsSync(path.join(__dirname, 'gitalk_init.json'))) {
 
         const reg = /{process\.env\.[a-zA-Z_\-}]*/gm
 
-        value.match(reg).forEach(match => {
-            config[key].replace(match, process.env[match.substring(13, match.length - 1)])
-        })
+        const match = value.match(reg)
+        if (match) {
+            match.forEach(match => {
+                config[key].replace(match, process.env[match.substring(13, match.length - 1)])
+            })
+        }
     })
 } else {
     // 配置信息
@@ -50,6 +53,18 @@ function configInit(config) {
 
     if (config.cacheRemote === undefined) {
         config.cacheRemote = `https://${config.repo}/gitalk-init-cache.json`
+    }
+
+    if (config.postsDir === undefined) {
+        config.postsDir = 'source/_posts'
+    }
+
+    if (config.cacheFile === undefined) {
+        config.cacheFile = path.join(__dirname, './public/gitalk-init-cache.json')
+    }
+
+    if (config.enableCache === undefined) {
+        config.enableCache = true
     }
 }
 
@@ -188,6 +203,10 @@ const autoGitalkInit = {
 
                 res.on('end', function () {
                     console.log(Buffer.concat(chunks).toString())
+
+                    if (res.statusCode !== 201) {
+                        return resolve([res, false]);
+                    }
 
                     return resolve([false, true]);
                 });
