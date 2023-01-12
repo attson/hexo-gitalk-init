@@ -21,7 +21,7 @@ Hexo gitalk 极简初始化脚本
 
 ```yaml
 - name: GITALK_INIT
-  run: GITALK_TOKEN=${{ secrets.BUILD_GITHUB_IO_GITALK }} curl -sL https://raw.githubusercontent.com/attson/hexo-gitalk-init/v1.0.0/gitalk_init.js | node
+  run: GITALK_TOKEN=${{ secrets.BUILD_GITHUB_IO_GITALK }} curl -sL https://raw.githubusercontent.com/attson/hexo-gitalk-init/v1.0.1/gitalk_init.js | node
 ```
 
 或者下载该脚本在项目中
@@ -90,7 +90,7 @@ json 文件支持使用process.env 占位, 在 process.env.name 前后增加 {}
 ### 2. 配置完成后, 执行命令
 
 ```bash
-curl -sL https://raw.githubusercontent.com/attson/hexo-gitalk-init/v1.0.0/gitalk_init.js | node
+curl -sL https://raw.githubusercontent.com/attson/hexo-gitalk-init/v1.0.1/gitalk_init.js | node
 ```
 
 ![img.png](doc/img.png)
