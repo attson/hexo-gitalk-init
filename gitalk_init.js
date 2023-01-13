@@ -190,7 +190,7 @@ const autoGitalkInit = {
         const reqBody = {
             'title': title,
             'labels': ['Gitalk', id],
-            'body': `[${link}](${link}})\r\n\r\n${desc}`
+            'body': `[${link}](${link})\r\n\r\n${desc}`
         };
 
         return new Promise(resolve => {
