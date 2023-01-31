@@ -76,6 +76,7 @@ const apiPath = '/repos/' + config.username + '/' + config.repo + '/issues';
 const autoGitalkInit = {
     gitalkCache: null,
     gitalkIdGenerator: null,
+    permalink: null,
     getFiles (dir, files_) {
         files_ = files_ || [];
         const files = fs.readdirSync(dir);
@@ -151,11 +152,67 @@ const autoGitalkInit = {
             return false;
         }
 
-        // pathname /year/month/day/file_without_extend/
-        post['pathname'] = '/' + post['date'].substring(0, 10).replace(/[-|\s]/g, '/') + `/${path.basename(file, '.md')}/`
+        // filename
+        const filename = path.basename(file, '.md');
+
+        post['pathname'] = '/' + this.getPathname(post['date'], post['title'], filename)
         post['desc'] = post['title']
 
         return post
+    },
+
+    getPermalink() {
+        let content = fs.readFileSync(path.join(__dirname, '_config.yml')).toString("utf-8")
+        let split = content.split("\n");
+        for (let i = 0; i < split.length; i++) {
+            if (split[i].startsWith("permalink: ")) {
+                return split[i].split("#")[0].substring(11)
+            }
+        }
+
+        return null
+    },
+
+    getPathname(date, title, file) {
+        const year = date.substring(0, 4)
+        const mm = date.substring(5, 7)
+        const dd = date.substring(8, 10)
+        const hh = date.substring(11, 13)
+
+        const permalinkRegex = /(:[a-zA-Z]+)/gm
+
+        let permalink = this.permalink
+
+        permalink.match(permalinkRegex).forEach(item => {
+            switch (item) {
+                case ":post_title": {
+                    permalink = permalink.replace(item, title)
+                    break;
+                }
+                case ":year": {
+                    permalink = permalink.replace(item, year)
+                    break;
+                }
+                case ":month": {
+                    permalink = permalink.replace(item, mm)
+                    break;
+                }
+                case ":day": {
+                    permalink = permalink.replace(item, dd)
+                    break;
+                }
+                case ":hour": {
+                    permalink = permalink.replace(item, hh)
+                    break;
+                }
+                case ":title": {
+                    permalink = permalink.replace(item, file)
+                    break;
+                }
+            }
+        })
+
+        return permalink
     },
 
     async readPosts(dir) {
@@ -202,17 +259,17 @@ const autoGitalkInit = {
                 });
 
                 res.on('end', function () {
-                    console.log(Buffer.concat(chunks).toString())
+                    let info = JSON.parse(Buffer.concat(chunks).toString())
 
                     if (res.statusCode !== 201) {
-                        return resolve([res, false]);
+                        return resolve([info.message, false]);
                     }
 
                     return resolve([false, true]);
                 });
 
                 res.on('error', function (error) {
-                    return resolve([error, false]);
+                    return resolve([error.message, false]);
                 });
             });
 
@@ -397,6 +454,11 @@ const autoGitalkInit = {
         return this.gitalkIdGenerator(pathname, title, desc, date)
     },
     async start(postDir) {
+        this.permalink = this.getPermalink()
+        if (!this.permalink) {
+            console.log(`gitalk: get permalink fail. stopped`);
+            return
+        }
         const posts = await this.readPosts(postDir);
         // 报错的数据
         const errorData = [];
